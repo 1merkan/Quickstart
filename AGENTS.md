@@ -27,7 +27,13 @@
 - In OpenCode, `/build` and `/deploy` do the above.
 
 ## Git habits
-- `main` is always deployable. Features go in `name/what` branches.
+- `main` is always deployable. Never commit to it directly.
+- Work in personal branches (`adiyat/…`, `raniya/…`, …), open a PR into
+  `staging` when ready.
+- `staging` is the integration branch: merge there, test on the robot,
+  then PR `staging` → `main`.
 - Commit early and often; push at the end of every work session.
+- Keep your branch fresh: `git merge origin/main` regularly to avoid
+  painful conflicts later.
 - Robot config exports live in `TeamCode/configs/` so a lost config never
   kills a competition day.

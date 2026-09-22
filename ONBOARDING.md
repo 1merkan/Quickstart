@@ -62,8 +62,10 @@ Then `cd ftc-main && ./gradlew assembleDebug` must succeed.
    re-check steps 3–4.
 
 ## 5. Daily workflow
-- `git pull` when you start, branch per feature (`adi/lift-auto`),
-  commit often, push when done, open a PR for review.
+- `git pull` when you start. Work in your personal branch.
+- Done with a feature? Open a PR into **`staging`**.
+- `staging` gets tested on the robot, then goes to **`main`** via PR.
+- Never push directly to `main` or `staging`.
 - Team rules are in `AGENTS.md` — read it once.
 - Robot config XMLs: export from the Robot Controller and commit them
   under `TeamCode/configs/` so they're backed up.
