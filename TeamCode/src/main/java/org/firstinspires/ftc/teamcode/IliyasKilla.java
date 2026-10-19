@@ -20,17 +20,14 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.teamcode.swervely.PinpointSetup;
 
-// main teleop. left stick drives, right stick turns, dpad nudges, right bumper is slow mode,
-// options resets forward. tune the public static numbers live from swervely
 @Config
 @TeleOp(name = "IliyasKilla", group = "TeleOp")
 public class IliyasKilla extends LinearOpMode {
-    // heading hold, keeps the robot facing where you left it while you drive
+    // // heading hold
     public static double HeadingKp = 2.0;
     public static double HeadingKi = 0.03;
     public static double HeadingKd = 0.4;
 
-    // 1 or -1. if the robot starts spinning by itself after you let go, flip it. 1 works rn
     public static double HeadingSign = 1.0;
 
     public static double HeadingMax = 0.5;
@@ -42,7 +39,7 @@ public class IliyasKilla extends LinearOpMode {
 
     public static double StepDegrees = 90;
 
-    // position hold. off for now (PositionMax = 0) cuz it made the robot creep away
+    // // position hold
     public static double XKp = 0.025;
     public static double XKi = 0.0;
     public static double XKd = 0.005;
@@ -53,7 +50,7 @@ public class IliyasKilla extends LinearOpMode {
 
     public static double PositionMax = 0.0;
 
-    // 1 or -1. our wheels are on in the weird roller pattern, that's why it's -1
+    // // driving
     public static double StrafeSign = -1.0;
 
     public static double DriveDeadzone = 0.1;
@@ -67,16 +64,20 @@ public class IliyasKilla extends LinearOpMode {
 
     public static boolean FieldCentric = true;
 
+    // // battery
     public static boolean VoltageComp = false;
     public static double NominalVoltage = 12.5;
 
+    // // hardware
     private DcMotor FL;
     private DcMotor FR;
     private DcMotor RL;
     private DcMotor RR;
 
     private GoBildaPinpointDriver Pinpoint;
+    private VoltageSensor Battery;
 
+    // // state
     private final Pid XPid = new Pid();
     private final Pid YPid = new Pid();
     private final Pid HeadingPid = new Pid();
@@ -91,10 +92,9 @@ public class IliyasKilla extends LinearOpMode {
 
     private long LastTime;
 
-    private VoltageSensor Battery;
-
     @Override
     public void runOpMode() {
+        // // setup
         FL = hardwareMap.get(DcMotor.class, "fl");
         FR = hardwareMap.get(DcMotor.class, "fr");
         RL = hardwareMap.get(DcMotor.class, "rl");
@@ -118,6 +118,7 @@ public class IliyasKilla extends LinearOpMode {
 
         Pinpoint.resetPosAndIMU();
 
+        // // dashboard
         FtcDashboard.getInstance().setTelemetryTransmissionInterval(25);
 
         FtcDashboard.getInstance().addAction("Reset heading", "Takes the way the robot faces now as forward for driving. Does not move it.", this::ResetHeading);
@@ -155,6 +156,7 @@ public class IliyasKilla extends LinearOpMode {
 
             if (Dt < 0.005 || Dt > 0.05) Dt = 0.02;
 
+            // // sticks
             double DriveX;
             double DriveY;
 
@@ -188,6 +190,7 @@ public class IliyasKilla extends LinearOpMode {
             double DpadX = ((gamepad1.dpad_right ? 1 : 0) - (gamepad1.dpad_left ? 1 : 0)) * DpadSpeed;
             double DpadY = ((gamepad1.dpad_up ? 1 : 0) - (gamepad1.dpad_down ? 1 : 0)) * DpadSpeed;
 
+            // // holds
             if (DriveX != 0 || DriveY != 0 || Turn != 0 || DpadX != 0 || DpadY != 0) {
                 IdleTimer.reset();
                 HoldActive = false;
@@ -235,6 +238,7 @@ public class IliyasKilla extends LinearOpMode {
                 Rotation = Range.clip(-HeadingSign * Output, -HeadingMax, HeadingMax);
             }
 
+            // // wheels
             double FieldX = DriveX - CorrectionLeft;
             double FieldY = DriveY + CorrectionForward;
 
@@ -275,6 +279,7 @@ public class IliyasKilla extends LinearOpMode {
             FR.setPower(PowerFR);
             RR.setPower(PowerRR);
 
+            // // telemetry
             telemetry.addData("Pose", "%.2f, %.2f, %.1f", X, Y, Math.toDegrees(Heading));
             telemetry.addData("Target", "%.2f, %.2f, %.1f", TargetX, TargetY, Math.toDegrees(TargetHeading));
             telemetry.addData("Error", "%.2f, %.2f, %.1f", TargetX - X, TargetY - Y, Math.toDegrees(AngleUnit.normalizeRadians(TargetHeading - Heading)));
@@ -346,7 +351,6 @@ public class IliyasKilla extends LinearOpMode {
         TargetHeading = AngleUnit.normalizeRadians(TargetHeading + Math.toRadians(StepDegrees));
         HeadingPid.Reset();
 
-        // pretend the turn ended TurnSettle ago, otherwise the settle wait would undo the step
         TurnTimer = new ElapsedTime(System.nanoTime() - (long) (TurnSettle * 1e9));
     }
 
