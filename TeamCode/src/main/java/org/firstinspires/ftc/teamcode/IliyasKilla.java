@@ -20,34 +20,29 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.teamcode.swervely.PinpointSetup;
 
-/**
- * Main TeleOp. Left stick drives, right stick turns, dpad nudges slowly, right bumper is slow
- * mode, options resets "forward". Every public static value can be tuned live from Swervely.
- */
+// main teleop. left stick drives, right stick turns, dpad nudges, right bumper is slow mode,
+// options resets forward. tune the public static numbers live from swervely
 @Config
 @TeleOp(name = "IliyasKilla", group = "TeleOp")
 public class IliyasKilla extends LinearOpMode {
-    // Heading hold: keeps the robot facing where it was pointed while you drive.
+    // heading hold, keeps the robot facing where you left it while you drive
     public static double HeadingKp = 2.0;
     public static double HeadingKi = 0.03;
     public static double HeadingKd = 0.4;
 
-    // 1 or -1. Flip it if the robot slowly spins by itself after you let go. 1 is right for now.
+    // 1 or -1. if the robot starts spinning by itself after you let go, flip it. 1 works rn
     public static double HeadingSign = 1.0;
 
     public static double HeadingMax = 0.5;
     public static double HeadingTolerance = 2.0;
 
-    // Seconds after letting go of the turn stick before heading hold takes over.
     public static double TurnSettle = 0.3;
 
-    // Take over sooner once the robot turns slower than this (deg/s). 0 = always wait TurnSettle.
     public static double SettledRate = 0;
 
-    // How far the "Heading step" button turns the target, for tuning heading hold.
     public static double StepDegrees = 90;
 
-    // Position hold: off (PositionMax = 0) because it made the robot creep away.
+    // position hold. off for now (PositionMax = 0) cuz it made the robot creep away
     public static double XKp = 0.025;
     public static double XKi = 0.0;
     public static double XKd = 0.005;
@@ -58,7 +53,7 @@ public class IliyasKilla extends LinearOpMode {
 
     public static double PositionMax = 0.0;
 
-    // 1 or -1. Our wheels are on in the non-standard roller pattern, hence -1.
+    // 1 or -1. our wheels are on in the weird roller pattern, that's why it's -1
     public static double StrafeSign = -1.0;
 
     public static double DriveDeadzone = 0.1;
@@ -68,12 +63,10 @@ public class IliyasKilla extends LinearOpMode {
     public static double TurnScale = 1.0;
     public static double TurnCurve = 1.0;
 
-    // Round deadzone with power ramping from its edge.
     public static boolean SmoothSticks = false;
 
     public static boolean FieldCentric = true;
 
-    // Scales wheel power up as the battery drops below NominalVoltage.
     public static boolean VoltageComp = false;
     public static double NominalVoltage = 12.5;
 
@@ -121,12 +114,10 @@ public class IliyasKilla extends LinearOpMode {
             Motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
 
-        // Pod offsets and directions live in PinpointSetup so every OpMode shares them.
         PinpointSetup.apply(Pinpoint);
 
         Pinpoint.resetPosAndIMU();
 
-        // 25 ms instead of the default 100 ms keeps the field and graphs smooth.
         FtcDashboard.getInstance().setTelemetryTransmissionInterval(25);
 
         FtcDashboard.getInstance().addAction("Reset heading", "Takes the way the robot faces now as forward for driving. Does not move it.", this::ResetHeading);
@@ -210,7 +201,6 @@ public class IliyasKilla extends LinearOpMode {
 
             if (Turn != 0) TurnTimer.reset();
 
-            // Waits at least 0.1 s so letting go mid-spin isn't mistaken for stopped.
             double TurnRate = Math.abs(Pinpoint.getHeadingVelocity(UnnormalizedAngleUnit.DEGREES));
             boolean Settled = TurnTimer.seconds() >= TurnSettle || (SettledRate > 0 && Turn == 0 && TurnTimer.seconds() >= 0.1 && TurnRate < SettledRate);
 
@@ -259,7 +249,6 @@ public class IliyasKilla extends LinearOpMode {
             double Cos = Math.cos(-Facing);
             double Sin = Math.sin(-Facing);
 
-            // The dpad is added after rotating, so it always moves relative to the robot.
             double RobotX = (FieldX * Cos - FieldY * Sin + DpadX) * StrafeSign;
             double RobotY = FieldX * Sin + FieldY * Cos + DpadY;
 
@@ -270,7 +259,6 @@ public class IliyasKilla extends LinearOpMode {
             double PowerFR = (RobotY - RobotX - Rotation) / Denominator;
             double PowerRR = (RobotY + RobotX - Rotation) / Denominator;
 
-            // Only read when used: asking the hub for voltage costs a couple of ms per loop.
             double Volts = VoltageComp ? Battery.getVoltage() : 0;
 
             if (VoltageComp && Volts > 6) {
@@ -336,7 +324,6 @@ public class IliyasKilla extends LinearOpMode {
         }
     }
 
-    // Saves the current spot for position hold. Leaves the target heading alone on purpose.
     private void StartHold() {
         TargetX = Pinpoint.getPosX(DistanceUnit.INCH);
         TargetY = Pinpoint.getPosY(DistanceUnit.INCH);
@@ -359,7 +346,7 @@ public class IliyasKilla extends LinearOpMode {
         TargetHeading = AngleUnit.normalizeRadians(TargetHeading + Math.toRadians(StepDegrees));
         HeadingPid.Reset();
 
-        // Pretend the turn ended TurnSettle ago, or the settle window would overwrite the step.
+        // pretend the turn ended TurnSettle ago, otherwise the settle wait would undo the step
         TurnTimer = new ElapsedTime(System.nanoTime() - (long) (TurnSettle * 1e9));
     }
 
