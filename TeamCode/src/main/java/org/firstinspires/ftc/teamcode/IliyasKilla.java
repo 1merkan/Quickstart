@@ -18,8 +18,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.UnnormalizedAngleUnit;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-import org.firstinspires.ftc.teamcode.swervely.PinpointSetup;
-
 @Config
 @TeleOp(name = "IliyasKilla", group = "TeleOp")
 public class IliyasKilla extends LinearOpMode {
@@ -114,7 +112,9 @@ public class IliyasKilla extends LinearOpMode {
             Motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
 
-        PinpointSetup.apply(Pinpoint);
+        Pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        Pinpoint.setOffsets(-112.06122589111327, 137.5010986328125, DistanceUnit.MM);
+        Pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
         Pinpoint.resetPosAndIMU();
 
