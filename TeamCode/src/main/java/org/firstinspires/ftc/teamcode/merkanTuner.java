@@ -10,6 +10,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
+import org.firstinspires.ftc.teamcode.swervely.PinpointSetup;
+
 /**
  * Hold-controller TeleOp (your merkanTuner, fixed).
  *
@@ -32,10 +34,6 @@ public class merkanTuner extends LinearOpMode {
     static final DcMotorSimple.Direction FR_DIR = DcMotorSimple.Direction.REVERSE;
     static final DcMotorSimple.Direction RL_DIR = DcMotorSimple.Direction.FORWARD;
     static final DcMotorSimple.Direction RR_DIR = DcMotorSimple.Direction.REVERSE;
-
-    // ---------- PINPOINT ----------
-    static final double POD_X_OFFSET_MM = 150;   // flip the sign of an offset if x/y drift while spinning in place
-    static final double POD_Y_OFFSET_MM = 110;
 
     // ---------- TURN THIS ON AFTER DRIVING WORKS ----------
     public static boolean HOLD_ENABLED = false;
@@ -87,11 +85,8 @@ public class merkanTuner extends LinearOpMode {
             m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
 
-        // FIX: offsets and pod type were never set in this file
-        pinpoint.setOffsets(POD_X_OFFSET_MM, POD_Y_OFFSET_MM, DistanceUnit.MM);
-        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD,
-                GoBildaPinpointDriver.EncoderDirection.FORWARD);
+        // pod type, offsets and pod directions come from PinpointSetup, shared with every program
+        PinpointSetup.apply(pinpoint);
         pinpoint.resetPosAndIMU();
 
         telemetry.addLine("TESTSETS3 ready. Hold starts " + (HOLD_ENABLED ? "ENABLED" : "DISABLED"));
@@ -239,6 +234,9 @@ public class merkanTuner extends LinearOpMode {
                 robotX = fieldX * cos - fieldY * sin;
                 robotY = fieldX * sin + fieldY * cos;
             }
+
+            // the wheels are on in the other pattern; IliyasKilla.StrafeSign says which way sliding goes
+            robotX *= IliyasKilla.StrafeSign;
 
             // ---- mecanum (rotation + = clockwise) ----
             double denom = Math.max(Math.abs(robotY) + Math.abs(robotX) + Math.abs(rotationPower), 1.0);
